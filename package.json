@@ -1,0 +1,12 @@
+{
+  "name": "react-clone",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "yarn parcel --no-hmr --open -p  9000 src/index.html"
+  },
+  "devDependencies": {
+    "parcel": "^2.10.3"
+  }
+}
