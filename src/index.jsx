@@ -1,3 +1,4 @@
+import ButtonTest from "./ButtonTest";
 import Welcome from "./Wellcome";
 
 export const React = {
@@ -39,10 +40,21 @@ const states = [];
 let index = 0;
 
 export function useState(initialState) {
-  let state = states[index] || initialState;
+  let state;
+  if (states[index] !== undefined) {
+    state = states[index];
+  } else {
+    state = initialState;
+    states[index] = initialState;
+  }
+
   let savedIndex = index;
   const setState = (value) => {
-    states[savedIndex] = value;
+    if (typeof value === "function") {
+      states[savedIndex] = value(states[savedIndex]);
+    } else {
+      states[savedIndex] = value;
+    }
     reRender();
   };
 
@@ -57,7 +69,8 @@ const App = () => {
 
   return (
     <div className={"test-css"}>
-      {new Array(10000).fill(true).map(() => (
+      <ButtonTest></ButtonTest>
+      {new Array(0).fill(true).map(() => (
         <Welcome />
       ))}
 
