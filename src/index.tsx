@@ -1,39 +1,42 @@
 import ButtonTest from "./ButtonTest";
 import Welcome from "./Wellcome";
+// import FikeNode, { renderFikeTree } from "./fiberLike/FikeNode";
+import FiberLike, { FikeNodeStruct } from "./fiberLike";
 
-export const React = {
-  createElement: (...agrs) => {
-    const [tagName, props, ...children] = agrs;
-    if (typeof tagName === "function") {
-      return tagName();
-    }
-    const newEle = document.createElement(tagName);
-    Object.keys(props)
-      .filter((prop) => !prop.startsWith("__"))
-      .forEach((prop) => {
-        if (typeof props[prop] == "function") {
-          newEle[prop] = props[prop];
-        } else {
-          newEle.setAttribute(prop, props[prop]);
-        }
-      });
-
-    children.forEach((child) => {
-      try {
-        if (["string", "number", "boolean"].includes(typeof child)) {
-          newEle.appendChild(document.createTextNode(child));
-        } else if (Array.isArray(child)) {
-          child.forEach((x) => newEle.appendChild(x));
-        } else {
-          newEle.appendChild(child);
-        }
-      } catch (error) {
-        console.error("Child is", child);
+function createElementInternal(...agrs) {
+  const [tagName, props, ...children] = agrs;
+  if (typeof tagName === "function") {
+    return tagName();
+  }
+  const newEle = document.createElement(tagName);
+  Object.keys(props)
+    .filter((prop) => !prop.startsWith("__"))
+    .forEach((prop) => {
+      if (typeof props[prop] == "function") {
+        newEle[prop] = props[prop];
+      } else {
+        newEle.setAttribute(prop, props[prop]);
       }
     });
 
-    return newEle;
-  },
+  children.forEach((child) => {
+    try {
+      if (["string", "number", "boolean"].includes(typeof child)) {
+        newEle.appendChild(document.createTextNode(child));
+      } else if (Array.isArray(child)) {
+        child.forEach((x) => newEle.appendChild(x));
+      } else {
+        newEle.appendChild(child);
+      }
+    } catch (error) {
+      console.error("Child is", child);
+    }
+  });
+
+  return newEle;
+}
+export const React = {
+  createElement: FiberLike.createElement,
 };
 
 const states = [];
@@ -69,10 +72,12 @@ const App = () => {
 
   return (
     <div className={"test-css"}>
+      {/* <p>Test</p>
+      <p>Test2</p> */}
       <ButtonTest></ButtonTest>
-      {new Array(0).fill(true).map(() => (
+      {/* {new Array(1).fill(true).map(() => (
         <Welcome />
-      ))}
+      ))} */}
 
       {/* <div>
         <span>{count1}</span>
@@ -89,7 +94,8 @@ const App = () => {
 
 function render(FC, container) {
   container.innerHTML = "";
-  container.appendChild(FC());
+  FiberLike.render(FC(), container);
+  // container.appendChild();
 }
 
 const reRender = () => {
