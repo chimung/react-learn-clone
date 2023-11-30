@@ -2,6 +2,7 @@ import ButtonTest from "./ButtonTest";
 import Welcome from "./Wellcome";
 // import FikeNode, { renderFikeTree } from "./fiberLike/FikeNode";
 import FiberLike, { FikeNodeStruct } from "./fiberLike";
+import React from './React'
 
 function createElementInternal(...agrs) {
   const [tagName, props, ...children] = agrs;
@@ -35,39 +36,9 @@ function createElementInternal(...agrs) {
 
   return newEle;
 }
-export const React = {
-  createElement: FiberLike.createElement,
-};
 
-const states = [];
-let index = 0;
-let timer;
-
-export function useState(initialState) {
-  let state;
-  if (states[index] !== undefined) {
-    state = states[index];
-  } else {
-    state = initialState;
-    states[index] = initialState;
-  }
-
-  let savedIndex = index;
-  const setState = (value) => {
-    if (typeof value === "function") {
-      states[savedIndex] = value(states[savedIndex]);
-    } else {
-      states[savedIndex] = value;
-    }
-    reRender();
-  };
-
-  index++;
-  return [state, setState];
-}
-
-const App: any = () => {
-  const [name, setName] = useState("Niteco");
+function App() {
+  const [name, setName] = React.useState("Niteco");
   // const [count1, setCount1] = useState(0);
   // const [count2, setCount2] = useState(0);
 
@@ -93,11 +64,4 @@ const App: any = () => {
   );
 };
 
-
-const reRender = () => {
-  index = 0;
-  clearTimeout(timer);
-  timer = setTimeout(() => FiberLike.render(App(), document.querySelector("#app")!), 10)
-};
-
-reRender();
+React.render(App, document.querySelector('#app'))
