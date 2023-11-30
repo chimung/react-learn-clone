@@ -25,7 +25,7 @@ export function cloneDumpFikeNode(tagName, attrs = {}): FikeNodeStruct {
             attrs,
             content: null
         },
-        isDirty: false
+        isDirty: true
     }
 }
 
@@ -80,7 +80,7 @@ export default function FikeNode(...options) {
     return currentFike;
 }
 
-export function renderFikeNode(node: FikeNodeStruct) {
+export function createElementFromFikeNode(node: FikeNodeStruct) {
     const tagName = node.data.tagName;
     let element;
 
@@ -98,7 +98,6 @@ export function renderFikeNode(node: FikeNodeStruct) {
             node.relations.firstChild = fikeTree;
             node.element = node.relations.parent.element;
 
-            // renderFikeTree(fikeTree)
             break;
         default:
             element = document.createElement(node.data.tagName)
@@ -119,12 +118,34 @@ export function renderFikeNode(node: FikeNodeStruct) {
 }
 
 export function renderFikeTree(node: FikeNodeStruct) {
-    renderFikeNode(node);
+    let nextNodeRender = node;
+    function traversalHandler(timeoutObject) {
+        while (timeoutObject.timeRemaining() > 5 && nextNodeRender) {
+            const currentNode = nextNodeRender
 
-    requestIdleCallback((timeoutObject) => {
-        if (timeoutObject.timeRemaining() > 0 || timeoutObject.didTimeout) {
-            node.relations.firstChild && renderFikeTree(node.relations.firstChild)
-            node.relations.sibling && renderFikeTree(node.relations.sibling)
+            if (currentNode.isDirty) {
+                if (currentNode.relations.parent.data.tagName == 'ROOT') {
+                    currentNode.relations.parent.element?.replaceChildren();
+                }
+                createElementFromFikeNode(currentNode);
+                currentNode.isDirty = false;
+            }
+
+
+            if (currentNode.relations.firstChild && currentNode.relations.firstChild.isDirty) {
+                nextNodeRender = currentNode.relations.firstChild
+            } else if (currentNode.relations.sibling && currentNode.relations.sibling.isDirty) {
+                nextNodeRender = currentNode.relations.sibling
+            } else {
+                nextNodeRender = currentNode.relations.parent
+            }
         }
-    }, { timeout: 100 })
+
+        if (nextNodeRender) {
+            requestIdleCallback(traversalHandler)
+        }
+    }
+
+
+    requestIdleCallback(traversalHandler)
 }

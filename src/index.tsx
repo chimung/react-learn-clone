@@ -41,6 +41,7 @@ export const React = {
 
 const states = [];
 let index = 0;
+let timer;
 
 export function useState(initialState) {
   let state;
@@ -65,7 +66,7 @@ export function useState(initialState) {
   return [state, setState];
 }
 
-const App = () => {
+const App: any = () => {
   const [name, setName] = useState("Niteco");
   // const [count1, setCount1] = useState(0);
   // const [count2, setCount2] = useState(0);
@@ -92,17 +93,11 @@ const App = () => {
   );
 };
 
-function render(FC, container) {
-  container.innerHTML = "";
-  FiberLike.render(FC(), container);
-  // container.appendChild();
-}
 
 const reRender = () => {
-  console.time("reRender");
   index = 0;
-  render(App, document.querySelector("#app"));
-  console.timeEnd("reRender");
+  clearTimeout(timer);
+  timer = setTimeout(() => FiberLike.render(App(), document.querySelector("#app")!), 10)
 };
 
 reRender();

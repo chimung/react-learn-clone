@@ -7,6 +7,7 @@ function createElement(...agrs) {
 export function render(fikeTree: FikeNodeStruct, container: HTMLElement) {
     fikeTree.relations.parent = cloneDumpFikeNode("ROOT")
     fikeTree.relations.parent.element = container;
+    fikeTree.relations.parent.isDirty = false;
 
     renderFikeTree(fikeTree);
 }
