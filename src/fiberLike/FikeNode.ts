@@ -120,7 +120,7 @@ export function createElementFromFikeNode(node: FikeNodeStruct) {
 export function renderFikeTree(node: FikeNodeStruct) {
     let nextNodeRender = node;
     function traversalHandler(timeoutObject) {
-        while (timeoutObject.timeRemaining() > 5 && nextNodeRender) {
+        while ((timeoutObject.timeRemaining() > 0 || timeoutObject.didTimeout) && nextNodeRender) {
             const currentNode = nextNodeRender
 
             if (currentNode.isDirty) {

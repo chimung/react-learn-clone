@@ -1,11 +1,12 @@
-import { React, useState } from ".";
+import React from "./React";
+
 function sleepms(value) {
   const start = Date.now();
   while (Date.now() < start + value) {}
 }
 export default function ButtonTest() {
-  const [isTrigger, setTrigger] = useState(false);
-  const [count, setCount] = useState(0);
+  const [isTrigger, setTrigger] = React.useState(false);
+  const [count, setCount] = React.useState(0);
 
   function sleepAndWrite() {
     for (let i = 0; i < 100; i++) {
@@ -80,14 +81,21 @@ export default function ButtonTest() {
 
     handler();
 
-    const otherTask = sleepWithChunk(1000);
-    otherTask();
+    // const otherTask = sleepWithChunk(1000);
+    // otherTask();
   };
+
+  function triggerNormal() {
+    for (let i = 0; i < 100; i++) setCount((i) => i + 1);
+  }
+
+  console.log("render count", count);
   return (
     <div>
       <p>{count}</p>
       <button onclick={trigger}>Tigger by Timeout</button>
       <button onclick={triggerRAF}>Tigger by rAF</button>
+      <button onclick={triggerNormal}>Tigger Nomarl</button>
     </div>
   );
 }

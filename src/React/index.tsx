@@ -1,4 +1,4 @@
-import FiberLike, { FikeNodeStruct } from "../fiberLike";
+import FiberLike from "../fiberLike";
 import InternalState from './internalState'
 function useStateFactory() {
     const states: unknown[] = [];
@@ -26,7 +26,7 @@ function useStateFactory() {
                         } else {
                             states[savedIndex] = value;
                         }
-                        reRender();
+                        setTimeout(() => reRender())
                     }
                 };
                 const useState = setStateFactory()
