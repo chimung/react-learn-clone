@@ -1,5 +1,16 @@
 import FiberLike from "../fiberLike";
-import InternalState from './internalState'
+import InternalState from './internalState';
+
+function createQueue() {
+    const queue: any[] = [];
+    return {
+        push: (item) => queue.push(item),
+        pop: () => queue.shift(),
+    }
+}
+
+const queueTasks = createQueue();
+
 function useStateFactory() {
     const states: unknown[] = [];
     let index = 0;
@@ -21,12 +32,14 @@ function useStateFactory() {
                 const setStateFactory = () => {
                     const savedIndex = index
                     return (value) => {
-                        if (typeof value === "function") {
-                            states[savedIndex] = value(states[savedIndex]);
-                        } else {
-                            states[savedIndex] = value;
-                        }
-                        setTimeout(() => reRender())
+                        queueTasks.push(() => {
+                            if (typeof value === "function") {
+                                states[savedIndex] = value(states[savedIndex]);
+                            } else {
+                                states[savedIndex] = value;
+                            }
+                            reRender()
+                        })
                     }
                 };
                 const useState = setStateFactory()
@@ -42,9 +55,8 @@ const useStateObject = useStateFactory();
 let timer;
 function reRender() {
     useStateObject.resetIndex();
-    clearTimeout(timer);
     const root = InternalState.getRootComponent()
-    timer = setTimeout(() => FiberLike.render(root(), InternalState.getContainer()))
+    FiberLike.render(root(), InternalState.getContainer())
 }
 export default {
     createElement: FiberLike.createElement,
