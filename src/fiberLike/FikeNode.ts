@@ -118,34 +118,42 @@ export function createElementFromFikeNode(node: FikeNodeStruct) {
 }
 
 export function renderFikeTree(node: FikeNodeStruct) {
-    let nextNodeRender = node;
-    function traversalHandler(timeoutObject) {
-        while ((timeoutObject.timeRemaining() > 0 || timeoutObject.didTimeout) && nextNodeRender) {
-            const currentNode = nextNodeRender
+    let nextNodeRender: FikeNodeStruct | null = node;
+    return new Promise((resolve) => {
+        function traversalHandler(timeoutObject) {
+            while ((timeoutObject.timeRemaining() > 0 || timeoutObject.didTimeout) && nextNodeRender) {
+                const currentNode = nextNodeRender
 
-            if (currentNode.isDirty) {
-                if (currentNode.relations.parent.data.tagName == 'ROOT') {
-                    currentNode.relations.parent.element?.replaceChildren();
+                if (currentNode.isDirty) {
+                    if (currentNode.relations.parent.data.tagName == 'ROOT') {
+                        currentNode.relations.parent.element?.replaceChildren();
+                    }
+                    createElementFromFikeNode(currentNode);
+                    currentNode.isDirty = false; // Mark complete render this node
+                } else {
+                    if (currentNode.relations.parent.data.tagName == 'ROOT') {
+                        console.log('Completed render')
+                        // Complete render
+                        nextNodeRender = null;
+                        resolve(null);
+                        break;
+                    }
                 }
-                createElementFromFikeNode(currentNode);
-                currentNode.isDirty = false;
+
+                if (currentNode.relations.firstChild && currentNode.relations.firstChild.isDirty) {
+                    nextNodeRender = currentNode.relations.firstChild
+                } else if (currentNode.relations.sibling && currentNode.relations.sibling.isDirty) {
+                    nextNodeRender = currentNode.relations.sibling
+                } else {
+                    nextNodeRender = currentNode.relations.parent
+                }
             }
 
-
-            if (currentNode.relations.firstChild && currentNode.relations.firstChild.isDirty) {
-                nextNodeRender = currentNode.relations.firstChild
-            } else if (currentNode.relations.sibling && currentNode.relations.sibling.isDirty) {
-                nextNodeRender = currentNode.relations.sibling
-            } else {
-                nextNodeRender = currentNode.relations.parent
+            if (nextNodeRender) {
+                requestIdleCallback(traversalHandler)
             }
         }
 
-        if (nextNodeRender) {
-            requestIdleCallback(traversalHandler)
-        }
-    }
-
-
-    requestIdleCallback(traversalHandler)
+        requestIdleCallback(traversalHandler)
+    })
 }

@@ -3,9 +3,36 @@ import InternalState from './internalState';
 
 function createQueue() {
     const queue: any[] = [];
+    let timer;
+    let promise;
+
     return {
-        push: (item) => queue.push(item),
-        pop: () => queue.shift(),
+        push: (item) => {
+            queue.push(item);
+
+            if (!promise) {
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    const loopHandler = () => {
+                        const task = queue.shift();
+                        if (task) {
+                            task();
+                            useStateObject.resetIndex();
+                            const root = InternalState.getRootComponent()
+                            promise = FiberLike.render(root(), InternalState.getContainer());
+                            promise.then(loopHandler)
+                        } else {
+                            promise = null;
+                        }
+                    }
+
+                    loopHandler()
+                })
+            }
+
+
+        },
+        numRemainingItems: () => queue.length
     }
 }
 
@@ -38,7 +65,6 @@ function useStateFactory() {
                             } else {
                                 states[savedIndex] = value;
                             }
-                            reRender()
                         })
                     }
                 };
@@ -52,12 +78,6 @@ function useStateFactory() {
 
 const useStateObject = useStateFactory();
 
-let timer;
-function reRender() {
-    useStateObject.resetIndex();
-    const root = InternalState.getRootComponent()
-    FiberLike.render(root(), InternalState.getContainer())
-}
 export default {
     createElement: FiberLike.createElement,
     useState: useStateObject.useState(),
@@ -66,6 +86,5 @@ export default {
         InternalState.setRootComponent(FC);
 
         FiberLike.render(FC(), container)
-    },
-    reRender
+    }
 };
