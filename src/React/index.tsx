@@ -1,4 +1,5 @@
 import FiberLike from "../fiberLike";
+import { createVirtualDOM } from "./createVirtualDOM";
 import InternalState from './internalState';
 import { Queue } from './queue';
 import { PriorityType, QueuePriority, Task } from "./queuePriority";
@@ -78,7 +79,7 @@ function useStateFactory() {
 const useStateObject = useStateFactory();
 
 export default {
-    createElement: FiberLike.createElement,
+    createElement: createVirtualDOM,
     useState: useStateObject.useState(),
     render: (FC, container) => {
         InternalState.setContainer(container);

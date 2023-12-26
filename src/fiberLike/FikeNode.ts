@@ -31,53 +31,85 @@ export function cloneDumpFikeNode(tagName, attrs = {}): FikeNodeStruct {
 
 export default function FikeNode(...options) {
     const [tagName, attrs, ...children] = options;
-
-    // Create current node
-    let currentFike: FikeNodeStruct
-    if (typeof tagName == 'function') {
-        currentFike = cloneDumpFikeNode('FUNCTIONAL_COMPONENT')
-        currentFike.data.content = tagName;
-    } else {
-        currentFike = cloneDumpFikeNode(tagName, attrs)
+    if (typeof tagName === 'function') {
+        return tagName();
     }
 
-    // Create children node
-    currentFike.data.content = currentFike.data.content == null ? '' : currentFike.data.content
-    const flattenChildren = children.reduce((result: FikeNodeStruct[], current) => {
-        if (Array.isArray(current)) {
-            result.push(...current)
-        } else {
-            result.push(current)
-        }
-        return result;
-    }, [])
-
-    flattenChildren.reduce((siblingFike: FikeNodeStruct | null, childFike: FikeNodeStruct | string | number | Function) => {
-        let node;
-
-        // assign children for current
-        const assignRelationship = (node: FikeNodeStruct, parent: FikeNodeStruct, sibling: FikeNodeStruct | null) => {
-            if (sibling) {
-                sibling.relations.sibling = node;
+    const currentFike = cloneDumpFikeNode(tagName, attrs);
+    if (children.length > 0) {
+        let firstChild: FikeNodeStruct, lastChild: FikeNodeStruct;
+        children.forEach(child => {
+            let fikeNode: FikeNodeStruct;
+            if (['string', 'number'].includes(typeof child)) {
+                fikeNode = cloneDumpFikeNode('TEXTNODE');
+                fikeNode.data.content = `${child}`; // Convert to string
             } else {
-                parent.relations.firstChild = node;
+                fikeNode = child as FikeNodeStruct
             }
-        }
-        if (['string', 'number'].includes(typeof childFike)) {
-            node = cloneDumpFikeNode('TEXTNODE');
-            node.relations.parent = currentFike;
-            assignRelationship(node, currentFike, siblingFike)
-            node.data.content = childFike
-        } else {
-            node = childFike as FikeNodeStruct
-            node.relations.parent = currentFike;
-            assignRelationship(node, currentFike, siblingFike)
-        }
-
-        return node;
-    }, null)
+    
+            fikeNode.relations.parent = currentFike;
+    
+            if (!firstChild) {
+                firstChild = lastChild = fikeNode;
+            } else {
+                lastChild.relations.sibling = fikeNode;
+                lastChild = fikeNode;
+            }
+        })
+        currentFike.relations.firstChild = firstChild!;
+    }
 
     return currentFike;
+
+
+    // const [tagName, attrs, ...children] = options;
+
+    // // Create current node
+    // let currentFike: FikeNodeStruct
+    // if (typeof tagName == 'function') {
+    //     currentFike = cloneDumpFikeNode('FUNCTIONAL_COMPONENT')
+    //     currentFike.data.content = tagName;
+    // } else {
+    //     currentFike = cloneDumpFikeNode(tagName, attrs)
+    // }
+
+    // // Create children node
+    // currentFike.data.content = currentFike.data.content == null ? '' : currentFike.data.content
+    // const flattenChildren = children.reduce((result: FikeNodeStruct[], current) => {
+    //     if (Array.isArray(current)) {
+    //         result.push(...current)
+    //     } else {
+    //         result.push(current)
+    //     }
+    //     return result;
+    // }, [])
+
+    // flattenChildren.reduce((siblingFike: FikeNodeStruct | null, childFike: FikeNodeStruct | string | number | Function) => {
+    //     let node;
+
+    //     // assign children for current
+    //     const assignRelationship = (node: FikeNodeStruct, parent: FikeNodeStruct, sibling: FikeNodeStruct | null) => {
+    //         if (sibling) {
+    //             sibling.relations.sibling = node;
+    //         } else {
+    //             parent.relations.firstChild = node;
+    //         }
+    //     }
+    //     if (['string', 'number'].includes(typeof childFike)) {
+    //         node = cloneDumpFikeNode('TEXTNODE');
+    //         node.relations.parent = currentFike;
+    //         assignRelationship(node, currentFike, siblingFike)
+    //         node.data.content = childFike
+    //     } else {
+    //         node = childFike as FikeNodeStruct
+    //         node.relations.parent = currentFike;
+    //         assignRelationship(node, currentFike, siblingFike)
+    //     }
+
+    //     return node;
+    // }, null)
+
+    // return currentFike;
 }
 
 export function createElementFromFikeNode(node: FikeNodeStruct) {
