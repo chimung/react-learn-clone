@@ -1,7 +1,5 @@
 import ButtonTest from "./ButtonTest";
 import Welcome from "./Wellcome";
-// import FikeNode, { renderFikeTree } from "./fiberLike/FikeNode";
-import FiberLike, { FikeNodeStruct } from "./fiberLike";
 import React from './React'
 
 function createElementInternal(...agrs) {
@@ -46,10 +44,11 @@ function App() {
     <div className={"test-css"}>
       {/* <p>Test</p>
       <p>Test2</p> */}
-      <ButtonTest></ButtonTest>
-      {/* {new Array(1).fill(true).map(() => (
-        <Welcome />
-      ))} */}
+
+      {new Array(10).fill(true).map(() => (
+        <ButtonTest></ButtonTest>
+        // <Welcome></Welcome>
+      ))}
 
       {/* <div>
         <span>{count1}</span>

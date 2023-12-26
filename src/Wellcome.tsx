@@ -1,7 +1,7 @@
-import { useState, React } from "./index";
+import React from './React'
 
 export default function Welcome() {
-  const [name, setName] = useState("Niteco");
+  const [name, setName] = React.useState("Niteco");
   return (
     <div>
       <h2>Hello {name}</h2>

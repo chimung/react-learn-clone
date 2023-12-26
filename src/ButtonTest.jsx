@@ -16,16 +16,16 @@ export default function ButtonTest() {
   }
 
   function sleepAndWriteTimeOut() {
+    console.log("Trigger trigger");
     let count = 0;
     const handler = () =>
       setTimeout(() => {
         setCount((value) => value + 1);
-        sleepms(10);
         count += 1;
         if (count < 100) {
           handler();
         }
-      }, 1000 / 60);
+      }, 500);
 
     handler();
     // for (let i = 0; i < 100; i++) {
@@ -89,6 +89,10 @@ export default function ButtonTest() {
     for (let i = 0; i < 100; i++) setCount((i) => i + 1);
   }
 
+  function increase() {
+    setCount((i) => i + 1);
+  }
+
   console.log("render count", count);
   return (
     <div>
@@ -96,6 +100,7 @@ export default function ButtonTest() {
       <button onclick={trigger}>Tigger by Timeout</button>
       <button onclick={triggerRAF}>Tigger by rAF</button>
       <button onclick={triggerNormal}>Tigger Nomarl</button>
+      <button onclick={increase}>Increase by 1</button>
     </div>
   );
 }

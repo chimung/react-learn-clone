@@ -132,7 +132,6 @@ export function renderFikeTree(node: FikeNodeStruct) {
                     currentNode.isDirty = false; // Mark complete render this node
                 } else {
                     if (currentNode.relations.parent.data.tagName == 'ROOT') {
-                        console.log('Completed render')
                         // Complete render
                         nextNodeRender = null;
                         resolve(null);

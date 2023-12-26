@@ -1,42 +1,41 @@
 import FiberLike from "../fiberLike";
 import InternalState from './internalState';
-
-function createQueue() {
-    const queue: any[] = [];
-    let timer;
+import { Queue } from './queue';
+import { PriorityType, QueuePriority, Task } from "./queuePriority";
+function setupQueue(queue: Queue) {
     let promise;
 
+    function loopTaskHandler() {
+
+        if (!queue.isEmpty()) {
+            const task = queue.pop();
+            task.job();
+            useStateObject.resetIndex();
+            const root = InternalState.getRootComponent()
+            promise = FiberLike.render(root(), InternalState.getContainer());
+            promise.then(loopTaskHandler)
+        } else {
+            promise = null;
+        }
+    }
+
     return {
-        push: (item) => {
-            queue.push(item);
-
+        pushEvent: (job) => {
+            queue.push(new Task(PriorityType.EVENT, job));
             if (!promise) {
-                clearTimeout(timer);
-                timer = setTimeout(() => {
-                    const loopHandler = () => {
-                        const task = queue.shift();
-                        if (task) {
-                            task();
-                            useStateObject.resetIndex();
-                            const root = InternalState.getRootComponent()
-                            promise = FiberLike.render(root(), InternalState.getContainer());
-                            promise.then(loopHandler)
-                        } else {
-                            promise = null;
-                        }
-                    }
-
-                    loopHandler()
-                })
+                loopTaskHandler()
             }
-
-
         },
-        numRemainingItems: () => queue.length
+        push: (job) => {
+            queue.push(new Task(PriorityType.RENDER, job));
+            if (!promise) {
+                loopTaskHandler()
+            }
+        },
     }
 }
 
-const queueTasks = createQueue();
+const queueTasks = setupQueue(new QueuePriority());
 
 function useStateFactory() {
     const states: unknown[] = [];
@@ -59,7 +58,7 @@ function useStateFactory() {
                 const setStateFactory = () => {
                     const savedIndex = index
                     return (value) => {
-                        queueTasks.push(() => {
+                        queueTasks.pushEvent(() => {
                             if (typeof value === "function") {
                                 states[savedIndex] = value(states[savedIndex]);
                             } else {

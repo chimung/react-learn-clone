@@ -8,5 +8,8 @@
   },
   "devDependencies": {
     "parcel": "^2.10.3"
+  },
+  "dependencies": {
+    "@datastructures-js/queue": "^4.2.3"
   }
 }
